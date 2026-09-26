@@ -9,7 +9,7 @@ vi.mock('@anthropic-ai/sdk', () => ({
   },
 }))
 
-const { handler } = await import('./challenge')
+const { handler } = await import('../challenge')
 
 function validPayload() {
   return {
