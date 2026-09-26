@@ -1,9 +1,9 @@
 // Core data model for SplitSecond.
 //
 // Boundary rule: this file, scoring.ts, validation.ts, and sensitivity.ts must
-// never import from ./ai/* or React. The ai/* layer may import types from
-// here (read-only consumption of DecisionResult/SensitivityResult) but the
-// reverse dependency is forbidden.
+// never import from ./audit/* or React. The audit/* layer may import types
+// from here (read-only consumption of DecisionResult/SensitivityResult) but
+// the reverse dependency is forbidden.
 
 export interface Criterion {
   id: string
@@ -37,8 +37,8 @@ export interface Decision {
   options: Option[]
   criteria: Criterion[]
   scores: Score[]
-  lastChallenge?: {
-    result: ChallengeResult
+  lastAudit?: {
+    result: AuditResult
     decisionSnapshotHash: string
     ranAt: string
   }
@@ -104,15 +104,18 @@ export interface SensitivityResult {
   inapplicableReason?: string
 }
 
-// ---- AI layer ----
+// ---- Reasoning-audit layer ----
 //
 // Every field below is a string, string-enum, or array of those. There is no
 // number field anywhere in this type, and no field named/shaped like
-// score/weight/ranking/winner/confidence. This is deliberate, structural
-// enforcement of "AI never touches the deterministic score" -- see
-// src/lib/ai/aiTypes.ts for the zod schema that enforces this at runtime.
+// score/weight/ranking/winner/confidence. This is deliberate: the audit
+// engine (src/lib/audit/auditEngine.ts) is a fully local, deterministic,
+// rule-based system with no external API calls -- but the same invariant
+// that used to keep an AI from touching the deterministic score still
+// matters here, because it's what keeps this layer auditable and keeps the
+// UI honest that nothing here overrides computeDecisionResult's output.
 
-export interface ChallengeResult {
+export interface AuditResult {
   schemaVersion: 1
   missingCriteria: { suggestion: string; rationale: string }[]
   unsupportedAssumptions: {
@@ -127,9 +130,9 @@ export interface ChallengeResult {
   }[]
   biasFlags: {
     biasType: string
-    location?: { optionId: string; criterionId: string }
+    location?: { optionId?: string; criterionId?: string }
     explanation: string
   }[]
   whatWouldChangeYourMind: { statement: string; relatedCriterionIds: string[] }[]
-  overallReasoningQualityNote: string
+  overallAuditSummary: string
 }

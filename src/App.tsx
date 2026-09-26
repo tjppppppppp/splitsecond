@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChallengePanel } from './components/ai/ChallengePanel'
+import { ChallengePanel } from './components/audit/ChallengePanel'
 import { DecisionEditor } from './components/decisions/DecisionEditor'
 import { DecisionList } from './components/decisions/DecisionList'
 import { ResultsView } from './components/results/ResultsView'
@@ -109,8 +109,8 @@ function App() {
             {activeTab === 'challenge' && (
               <ChallengePanel
                 decision={selected}
-                onChallengeStored={(lastChallenge) =>
-                  store.updateDecision(selected.id, { lastChallenge })
+                onAuditStored={(lastAudit) =>
+                  store.updateDecision(selected.id, { lastAudit })
                 }
               />
             )}

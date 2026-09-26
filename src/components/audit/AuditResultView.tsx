@@ -1,21 +1,25 @@
-import type { ChallengeResult, Decision } from '../../lib/types'
+import type { AuditResult, Decision } from '../../lib/types'
 
-interface ChallengeResultViewProps {
-  result: ChallengeResult
+interface AuditResultViewProps {
+  result: AuditResult
   decision: Decision
 }
 
-function locationLabel(decision: Decision, loc?: { optionId: string; criterionId: string }): string | null {
-  if (!loc) return null
-  const option = decision.options.find((o) => o.id === loc.optionId)?.name ?? loc.optionId
-  const criterion = decision.criteria.find((c) => c.id === loc.criterionId)?.name ?? loc.criterionId
-  return `${option} × ${criterion}`
+function locationLabel(
+  decision: Decision,
+  loc?: { optionId?: string; criterionId?: string },
+): string | null {
+  if (!loc || (!loc.optionId && !loc.criterionId)) return null
+  const option = loc.optionId ? decision.options.find((o) => o.id === loc.optionId)?.name ?? loc.optionId : null
+  const criterion = loc.criterionId ? decision.criteria.find((c) => c.id === loc.criterionId)?.name ?? loc.criterionId : null
+  if (option && criterion) return `${option} × ${criterion}`
+  return option ?? criterion
 }
 
-export function ChallengeResultView({ result, decision }: ChallengeResultViewProps) {
+export function AuditResultView({ result, decision }: AuditResultViewProps) {
   return (
     <div>
-      <p>{result.overallReasoningQualityNote}</p>
+      <p>{result.overallAuditSummary}</p>
 
       {result.missingCriteria.length > 0 && (
         <section className="challenge-section">

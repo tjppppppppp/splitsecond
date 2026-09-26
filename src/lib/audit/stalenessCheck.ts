@@ -1,7 +1,7 @@
 // A stable (non-cryptographic) hash over the parts of a Decision that matter
-// for the AI challenge: options, criteria, and scores/reasoning. Deliberately
-// excludes createdAt/updatedAt so touching timestamps alone never triggers a
-// false "stale" warning.
+// for the reasoning audit: options, criteria, and scores/reasoning.
+// Deliberately excludes createdAt/updatedAt so touching timestamps alone
+// never triggers a false "stale" warning.
 
 import type { Decision } from '../types'
 
@@ -40,6 +40,6 @@ export function hashDecisionContent(decision: Decision): string {
   return fnv1a(canonicalize(decision))
 }
 
-export function isChallengeStale(decision: Decision, lastChallengeHash: string): boolean {
-  return hashDecisionContent(decision) !== lastChallengeHash
+export function isAuditStale(decision: Decision, lastAuditHash: string): boolean {
+  return hashDecisionContent(decision) !== lastAuditHash
 }

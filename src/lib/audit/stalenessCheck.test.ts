@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hashDecisionContent, isChallengeStale } from './stalenessCheck'
+import { hashDecisionContent, isAuditStale } from './stalenessCheck'
 import type { Decision } from '../types'
 
 function decision(partial: Partial<Decision>): Decision {
@@ -16,7 +16,7 @@ function decision(partial: Partial<Decision>): Decision {
   }
 }
 
-describe('hashDecisionContent / isChallengeStale', () => {
+describe('hashDecisionContent / isAuditStale', () => {
   it('is stable across calls for identical content', () => {
     const d = decision({ title: 'A' })
     expect(hashDecisionContent(d)).toBe(hashDecisionContent(d))
@@ -26,7 +26,7 @@ describe('hashDecisionContent / isChallengeStale', () => {
     const d1 = decision({ title: 'A', updatedAt: '2026-01-01T00:00:00.000Z' })
     const d2 = decision({ title: 'A', updatedAt: '2026-06-01T00:00:00.000Z', createdAt: '2020-01-01T00:00:00.000Z' })
     expect(hashDecisionContent(d1)).toBe(hashDecisionContent(d2))
-    expect(isChallengeStale(d2, hashDecisionContent(d1))).toBe(false)
+    expect(isAuditStale(d2, hashDecisionContent(d1))).toBe(false)
   })
 
   it('changes when a score value changes', () => {
@@ -37,7 +37,7 @@ describe('hashDecisionContent / isChallengeStale', () => {
     })
     const d2 = { ...d1, scores: [{ optionId: 'a', criterionId: 'c1', value: 9, reasoning: 'r' }] }
     expect(hashDecisionContent(d1)).not.toBe(hashDecisionContent(d2))
-    expect(isChallengeStale(d2, hashDecisionContent(d1))).toBe(true)
+    expect(isAuditStale(d2, hashDecisionContent(d1))).toBe(true)
   })
 
   it('changes when reasoning text changes', () => {
@@ -47,7 +47,7 @@ describe('hashDecisionContent / isChallengeStale', () => {
       scores: [{ optionId: 'a', criterionId: 'c1', value: 5, reasoning: 'old reasoning' }],
     })
     const d2 = { ...d1, scores: [{ optionId: 'a', criterionId: 'c1', value: 5, reasoning: 'new reasoning' }] }
-    expect(isChallengeStale(d2, hashDecisionContent(d1))).toBe(true)
+    expect(isAuditStale(d2, hashDecisionContent(d1))).toBe(true)
   })
 
   it('is insensitive to array order (sorted internally)', () => {
