@@ -1,32 +1,49 @@
-# React + TypeScript + Vite
+# SplitSecond
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A structured decision-making tool. Define options, weight criteria to 100%,
+score each option 1-10 with written reasoning, and get a deterministic
+weighted result. Separately, deterministic sensitivity analysis shows how
+robust the result is to changes in weights or scores. Separately again, an AI
+"Challenge My Decision" feature critiques the *reasoning* behind your scores —
+missing criteria, unsupported assumptions, double-counted factors,
+uncertainty, and cognitive biases.
 
-Currently, two official plugins are available:
+**Architecture rule:** AI never calculates or alters the deterministic score.
+All scoring and sensitivity analysis is plain, unit-tested TypeScript
+(`src/lib/scoring.ts`, `src/lib/sensitivity.ts`). The AI layer
+(`src/lib/ai/`, `netlify/functions/challenge.ts`) only ever reads the
+already-computed result as context and returns a response type
+(`ChallengeResult`) that has no numeric score/weight/ranking/confidence field
+anywhere in it — enforced both by TypeScript and by a strict zod schema on
+the server.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Local development
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+npm install
+npm run dev        # http://localhost:5173
+npm test           # Vitest — full engine + component + function test suite
+npm run build      # production build (tsc -b && vite build)
+npm run preview    # serve the production build locally
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+To exercise the AI panel locally, create a `.env` (gitignored) from
+`.env.example` and set your own `ANTHROPIC_API_KEY`, then run `netlify dev`
+instead of `npm run dev` so the Netlify Function is served alongside the app.
+
+## Data
+
+Decisions are stored in the browser's `localStorage`
+(`splitsecond.decisions.v1`) — nothing is sent to a server except the
+read-only context for an AI challenge request. Use the Export/Import JSON
+buttons on the decision list as a manual backup, since localStorage is
+per-browser and not synced across devices.
+
+## Deployment
+
+Static site + one Netlify Function (`netlify/functions/challenge.ts`), see
+`netlify.toml`. The function requires `ANTHROPIC_API_KEY` set as an
+environment variable in the Netlify dashboard (Site settings > Environment
+variables, scoped to Functions) — without it, the AI panel reports a clean
+"not configured" state rather than failing silently; the deterministic
+scoring and sensitivity views work fully without it.
