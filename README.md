@@ -43,3 +43,8 @@ backup, since localStorage is per-browser and not synced across devices.
 
 Static site only &mdash; no server component, no functions, no environment
 variables. See `netlify.toml` (build command + SPA fallback redirect only).
+
+**Continuous deployment:** this repo is linked to Netlify via a read-only
+deploy key (Settings &gt; Deploy keys on GitHub) rather than the GitHub App
+integration. Every push to `main` triggers an automatic production build and
+deploy &mdash; no manual `netlify deploy` step needed.
